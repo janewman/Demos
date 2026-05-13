@@ -70,8 +70,15 @@ const postMessage = (message, response) => {
     const botMessage = renderMessage(response, true);
     messageList.appendChild(botMessage);
 
-    // screen reader notification that reads the text of the bot response
-    botMessage.ariaNotify(message);
+    // Announce the bot response for screen reader users.
+    // ariaNotify() is Chromium-only as of writing — feature-detect
+    // and fall back to a hidden aria-live region (provided by
+    // shared.js as `window.focusgroupDemosAnnounce`).
+    if (typeof botMessage.ariaNotify === "function") {
+      botMessage.ariaNotify(response);
+    } else if (typeof window.focusgroupDemosAnnounce === "function") {
+      window.focusgroupDemosAnnounce(response);
+    }
   }, RESPONSE_DELAY);
 };
 

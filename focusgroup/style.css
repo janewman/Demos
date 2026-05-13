@@ -126,26 +126,181 @@ body {
   padding: 2rem;
 }
 
-/* ----- Warning Banner ----- */
-.warning-banner {
-  background: var(--warning-bg);
-  border: 1px solid var(--warning-border);
-  color: var(--warning-text);
-  padding: 1rem 1.25rem;
-  border-radius: var(--radius);
-  margin-bottom: 1.5rem;
-  font-size: 0.95rem;
-  line-height: 1.5;
+/* ----- Implementation status pill ----- */
+.fg-impl-mount {
+  /* Placeholder, reserves layout space until pill is injected.
+     Empty mount has zero height; pill itself supplies dimensions. */
+  margin-top: 0.75rem;
 }
 
-.warning-banner strong {
+.fg-impl-pill {
+  /* Light-theme defaults; overridden by state modifiers and dark theme.
+     The pill itself stays neutral (matches the page-header card); the
+     state color appears only on the small icon dot, not as a filled
+     background. This avoids the pastel-badge SaaS look. */
+  --fg-pill-accent: var(--text-muted);
+
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.3rem 0.7rem;
+  background: var(--bg-card);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  line-height: 1.3;
+  max-width: 100%;
+}
+
+.fg-impl-pill__dot {
+  /* Solid colored dot indicator. The text label carries the meaning;
+     this dot reinforces with the state color. */
+  display: inline-block;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 999px;
+  background: var(--fg-pill-accent);
+  flex-shrink: 0;
+}
+
+/* <details> wrapping: the summary still looks like the pill, but the
+   disclosure body is an inline note attached below by a hairline,
+   not a floating card. */
+details.fg-impl-pill {
+  display: inline-block;
+  padding: 0;
+  border-radius: 1rem;
+  background: transparent;
+  border: none;
+  font-weight: normal;
+}
+
+details.fg-impl-pill > .fg-impl-pill__summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.3rem 0.7rem;
+  background: var(--bg-card);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+
+/* Remove the default marker; we supply a styled chevron via ::after. */
+details.fg-impl-pill > .fg-impl-pill__summary::-webkit-details-marker {
+  display: none;
+}
+details.fg-impl-pill > .fg-impl-pill__summary::after {
+  content: "▾";
+  font-size: 0.7rem;
+  margin-left: 0.15rem;
+  color: var(--text-muted);
+  transition: transform 0.15s ease;
+}
+details.fg-impl-pill[open] > .fg-impl-pill__summary::after {
+  transform: rotate(180deg);
+}
+
+/* Keyboard focus indicator on the summary. */
+details.fg-impl-pill > .fg-impl-pill__summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.fg-impl-pill__body {
   display: block;
-  margin-bottom: 0.25rem;
+  margin-top: 0.625rem;
+  padding: 0.625rem 0 0;
+  background: transparent;
+  color: var(--text);
+  border: 0;
+  border-top: 1px solid var(--border);
+  font-size: 0.9rem;
+  font-weight: normal;
+  line-height: 1.5;
+  max-width: 44rem;
+}
+.fg-impl-pill__body p {
+  margin: 0.5rem 0;
+}
+.fg-impl-pill__body p:first-child { margin-top: 0; }
+.fg-impl-pill__body p:last-child { margin-bottom: 0; }
+.fg-impl-pill__body code {
+  background: var(--code-bg);
+  padding: 0.05rem 0.3rem;
+  border-radius: 3px;
+  font-size: 0.85em;
+}
+.fg-impl-pill__body a {
+  color: var(--accent);
+}
+.fg-impl-pill__note {
+  font-size: 0.85em;
+  color: var(--text-muted);
 }
 
-.warning-banner a {
-  color: inherit;
-  font-weight: 600;
+/* State modifiers — colored only on the icon dot.
+   Tones are picked to be distinguishable for color-vision deficiencies
+   when paired with the glyph (✓ / ↻ / !) and to meet ≥3:1 against the
+   neutral pill background. */
+.fg-impl-pill--native      { --fg-pill-accent: #107c10; }
+.fg-impl-pill--polyfill    { --fg-pill-accent: #8a5300; }
+.fg-impl-pill--unsupported { --fg-pill-accent: #a4262c; }
+
+/* Dark-theme variants — slightly brighter accents for readability on
+   the dark card background. */
+@media (prefers-color-scheme: dark) {
+  .fg-impl-pill--native      { --fg-pill-accent: #4ade80; }
+  .fg-impl-pill--polyfill    { --fg-pill-accent: #fbbf24; }
+  .fg-impl-pill--unsupported { --fg-pill-accent: #f87171; }
+}
+
+/* Forced-colors / Windows High Contrast — use system colors so the
+   pill remains distinguishable regardless of theme. We override the
+   pill itself AND descendants of the disclosure body, since `code`,
+   `a`, and `.fg-impl-pill__note` keep non-system colors from more
+   specific rules above. */
+@media (forced-colors: active) {
+  .fg-impl-pill,
+  details.fg-impl-pill > .fg-impl-pill__summary,
+  .fg-impl-pill__body {
+    background: Canvas;
+    color: CanvasText;
+    border-color: CanvasText;
+    forced-color-adjust: none;
+  }
+  .fg-impl-pill__dot {
+    background: CanvasText;
+  }
+  .fg-impl-pill__body p,
+  .fg-impl-pill__note {
+    color: CanvasText;
+  }
+  .fg-impl-pill__body a {
+    color: LinkText;
+  }
+  .fg-impl-pill__body code {
+    background: Canvas;
+    color: CanvasText;
+    border: 1px solid CanvasText;
+  }
+  details.fg-impl-pill > .fg-impl-pill__summary:focus-visible {
+    outline-color: Highlight;
+  }
+}
+
+/* Honor reduced-motion: skip the chevron rotation. */
+@media (prefers-reduced-motion: reduce) {
+  details.fg-impl-pill > .fg-impl-pill__summary::after {
+    transition: none;
+  }
 }
 
 /* ----- Demo Section ----- */
@@ -514,11 +669,6 @@ body {
   flex-direction: row-reverse;
   reading-flow: flex-visual;
   gap: 0.35rem;
-}
-
-#feature-detect-result {
-  padding: 0.75rem;
-  border-radius: 4px;
 }
 
 /* ----- Radio Group ----- */

@@ -12,13 +12,13 @@
 <body>
   <header class="page-header">
     <h1>Focusgroup: Interactive Demos</h1>
-    <p>Declarative arrow-key keyboard navigation for composite widgets. No
-      JavaScript required.</p>
+    <p><code>focusgroup</code> adds native arrow-key navigation to
+      composite widgets, so you don't have to write roving-tabindex
+      JavaScript. Browsers without native support load the polyfill
+      for the same behavior.</p>
   </header>
 
   <main class="page-content">
-    <!-- Feature detection warning inserted here by shared.js if
-            unsupported -->
 
     <section class="demo-section">
       <h2 id="what-is-focusgroup">What is <code>focusgroup</code>?</h2>
@@ -165,33 +165,18 @@
             (Open UI)</a></li>
         <li><a href="https://www.w3.org/WAI/ARIA/apg/">ARIA Authoring
             Practices Guide (APG)</a></li>
+        <li><a href="https://github.com/microsoft/polyfills/tree/main/packages/focusgroup">
+            @microsoft/focusgroup-polyfill</a> — used as fallback in
+          browsers without native <code>focusgroup</code></li>
         <li><a href="https://github.com/MicrosoftEdge/Demos">
             MicrosoftEdge/Demos on
             GitHub</a></li>
       </ul>
     </section>
-
-    <section class="demo-section">
-      <h2 id="browser-support">Browser Support</h2>
-      <p>
-        The <code>focusgroup</code> attribute is an
-        <strong>experimental feature</strong>. At the time
-        of writing, you may need to enable experimental browser flags
-        in Microsoft Edge or another
-        Chromium-based browser:
-      </p>
-      <ol>
-        <li>Open <code>about://flags</code> in Microsoft Edge or
-          another Chromium-based browser</li>
-        <li>Search for <strong>Experimental Web Platform
-            features</strong></li>
-        <li>Set the flag to <strong>Enabled</strong></li>
-        <li>Restart the browser</li>
-      </ol>
-    </section>
   </main>
 
   <script src="shared.js"></script>
+  <script type="module" src="load-focusgroup.mjs"></script>
 </body>
 
 </html>

@@ -2,7 +2,9 @@
 
 ➡️ **[Open the demo](https://microsoftedge.github.io/Demos/focusgroup/)** ⬅️
 
-Interactive demos for the HTML `focusgroup` attribute, which lets you add arrow-key navigation to composite widgets (the roving tabindex pattern) without JavaScript.
+Interactive demos for the HTML `focusgroup` attribute, which lets you add arrow-key navigation to composite widgets (the roving tabindex pattern) without author-written JavaScript for focus management.
+
+These demos run in current browsers. If a browser supports `focusgroup`, the page uses the native implementation. If it doesn't, the vendored [`@microsoft/focusgroup-polyfill`](https://github.com/microsoft/polyfills/tree/main/packages/focusgroup) handles the same arrow-key behavior. Each page shows a small status pill in the header so you can see which path you're using.
 
 ## Demos
 
@@ -23,6 +25,26 @@ Interactive demos for the HTML `focusgroup` attribute, which lets you add arrow-
 - [Focusgroup polyfill (GitHub)](https://github.com/microsoft/polyfills/tree/main/packages/focusgroup) ([npm: `@microsoft/focusgroup-polyfill`](https://www.npmjs.com/package/@microsoft/focusgroup-polyfill))
 - [ARIA Authoring Practices Guide (APG)](https://www.w3.org/WAI/ARIA/apg/)
 
-## Requirements
+## Browser support
 
-These demos use the scoped-focusgroup variant of the spec and require enabling the **Experimental Web Platform features** flag at `about://flags` in Microsoft Edge or another Chromium-based browser. The feature is experimental and not yet enabled by default in stable builds. See the [Open UI explainer](https://open-ui.org/components/scoped-focusgroup.explainer/) for the spec status.
+These demos work in any current Chromium-, Gecko-, or WebKit-based browser. The status pill in each page header tells you which implementation is running:
+
+- **✅ Native focusgroup** — your browser supports the attribute natively. Native support ships by default in **Chromium 150** ([chromestatus.com](https://chromestatus.com/feature/5637601087193088)) and is available before that via the *Experimental Web Platform features* flag.
+- **🧩 Polyfilled focusgroup** — `@microsoft/focusgroup-polyfill` (vendored in `vendor/`) provides the behavior. The pill's expand control includes instructions for enabling the native implementation if you'd like to compare.
+- **⚠ focusgroup unsupported** — your browser couldn't load the polyfill (extremely old browser). The demos won't work here.
+
+For debugging: append `?focusgroup=no-polyfill` to any demo URL to force the polyfill off (useful for isolating whether a bug is caused by the polyfill).
+
+The polyfill only covers the `focusgroup` attribute. It doesn't add `popover`, CSS `reading-flow`, or `Element.ariaNotify`, so a specific demo can still behave differently if your browser lacks one of those features. (See the polyfill's [Limitations section](https://github.com/microsoft/polyfills/blob/0955f792/packages/focusgroup/README.md#limitations) for the full list of behaviors the polyfill does and doesn't replicate.)
+
+## Contributing a new demo
+
+When adding a new `*.html` page under `/focusgroup/`, include the same two scripts every other page does, in this order, just before `</body>`:
+
+```html
+<script src="shared.js"></script>
+<script type="module" src="load-focusgroup.mjs"></script>
+```
+
+Use `../shared.js` and `../load-focusgroup.mjs` from inside a subdirectory (see `chatbot/index.html`). `shared.js` injects the status pill into `.page-header`, and `load-focusgroup.mjs` handles the native-vs-polyfill detection.
+

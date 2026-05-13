@@ -67,9 +67,13 @@
       <p>
         A horizontal menubar. <code>menubar</code> defaults to inline (Left/Right)
         navigation between top-level items.
-        Each submenu uses a separate <code>focusgroup="menu"</code> which defaults
-        to block (Up/Down) navigation.
-        Submenus use the <code>popover</code> attribute for display.
+        Each submenu is a <code>focusgroup="menu"</code> (defaulting to
+        block, Up/Down navigation) that's revealed via the
+        <code>popover</code> attribute. To make this work under the
+        <code>@microsoft/focusgroup-polyfill</code> as well as native, the
+        submenus initialize as <code>focusgroup="none"</code> and a small
+        <code>toggle</code> handler flips them to <code>focusgroup="menu"</code>
+        on open and back on close — see "Polyfill consideration" below.
       </p>
       <div class="attr-label">focusgroup="menubar"</div>
 
@@ -86,36 +90,36 @@
           <li role="none">
             <button role="menuitem" type="button" class="menubar-item"
               aria-haspopup="menu" aria-expanded="false" popovertarget="filemenu">File</button>
-            <ul role="menu" focusgroup="menu" id="filemenu" popover aria-label="File submenu" class="submenu">
-              <li role="none"><button type="button" class="submenu-item" autofocus>New</button></li>
-              <li role="none"><button type="button" class="submenu-item">Open</button></li>
-              <li role="none"><button type="button" class="submenu-item">Save</button></li>
+            <ul role="menu" focusgroup="none" id="filemenu" popover aria-label="File submenu" class="submenu">
+              <li role="none"><button role="menuitem" type="button" class="submenu-item" autofocus>New</button></li>
+              <li role="none"><button role="menuitem" type="button" class="submenu-item">Open</button></li>
+              <li role="none"><button role="menuitem" type="button" class="submenu-item">Save</button></li>
             </ul>
           </li>
           <li role="none">
             <button role="menuitem" type="button" class="menubar-item"
               aria-haspopup="menu" aria-expanded="false" popovertarget="editmenu">Edit</button>
-            <ul role="menu" focusgroup="menu" id="editmenu" popover aria-label="Edit submenu" class="submenu">
-              <li role="none"><button type="button" class="submenu-item" autofocus>Cut</button></li>
-              <li role="none"><button type="button" class="submenu-item">Copy</button></li>
-              <li role="none"><button type="button" class="submenu-item">Paste</button></li>
+            <ul role="menu" focusgroup="none" id="editmenu" popover aria-label="Edit submenu" class="submenu">
+              <li role="none"><button role="menuitem" type="button" class="submenu-item" autofocus>Cut</button></li>
+              <li role="none"><button role="menuitem" type="button" class="submenu-item">Copy</button></li>
+              <li role="none"><button role="menuitem" type="button" class="submenu-item">Paste</button></li>
             </ul>
           </li>
           <li role="none">
             <button role="menuitem" type="button" class="menubar-item"
               aria-haspopup="menu" aria-expanded="false" popovertarget="viewmenu">View</button>
-            <ul role="menu" focusgroup="menu" id="viewmenu" popover aria-label="View submenu" class="submenu">
-              <li role="none"><button type="button" class="submenu-item" autofocus>Zoom In</button></li>
-              <li role="none"><button type="button" class="submenu-item">Zoom Out</button></li>
-              <li role="none"><button type="button" class="submenu-item">Full Screen</button></li>
+            <ul role="menu" focusgroup="none" id="viewmenu" popover aria-label="View submenu" class="submenu">
+              <li role="none"><button role="menuitem" type="button" class="submenu-item" autofocus>Zoom In</button></li>
+              <li role="none"><button role="menuitem" type="button" class="submenu-item">Zoom Out</button></li>
+              <li role="none"><button role="menuitem" type="button" class="submenu-item">Full Screen</button></li>
             </ul>
           </li>
           <li role="none">
             <button role="menuitem" type="button" class="menubar-item"
               aria-haspopup="menu" aria-expanded="false" popovertarget="helpmenu">Help</button>
-            <ul role="menu" focusgroup="menu" id="helpmenu" popover aria-label="Help submenu" class="submenu">
-              <li role="none"><button type="button" class="submenu-item" autofocus>Documentation</button></li>
-              <li role="none"><button type="button" class="submenu-item">About</button></li>
+            <ul role="menu" focusgroup="none" id="helpmenu" popover aria-label="Help submenu" class="submenu">
+              <li role="none"><button role="menuitem" type="button" class="submenu-item" autofocus>Documentation</button></li>
+              <li role="none"><button role="menuitem" type="button" class="submenu-item">About</button></li>
             </ul>
           </li>
         </ul>
@@ -131,6 +135,9 @@
         <li>The spec leaves the orthogonal axis (Up/Down on the menubar)
           free for authors. JavaScript can open/close submenus with
           those keys as a progressive enhancement.</li>
+        <li>This demo initializes submenus with <code>focusgroup="none"</code>
+          and switches them to <code>focusgroup="menu"</code> when the popover
+          opens. The next section explains why.</li>
       </ul>
 
       <details class="source-code">
@@ -141,16 +148,90 @@
         &lt;button role="menuitem" type="button" class="menubar-item"
              aria-haspopup="menu" aria-expanded="false"
              popovertarget="filemenu"&gt;File&lt;/button&gt;
-        &lt;ul role="menu" focusgroup="menu"
+        &lt;!-- The submenu starts with focusgroup="none" while hidden.
+             A small `toggle` listener (see the inline script at the
+             bottom of this page) switches it to focusgroup="menu" when
+             the popover opens, then back to "none" when it closes.
+             With that attribute change, arrow-key behavior works in
+             both native focusgroup and @microsoft/focusgroup-polyfill;
+             the polyfill doesn't observe popover visibility directly. --&gt;
+        &lt;ul role="menu" focusgroup="none"
              id="filemenu" popover aria-label="File submenu" class="submenu"&gt;
-            &lt;li role="none"&gt;&lt;button type="button" class="submenu-item"
+            &lt;li role="none"&gt;&lt;button role="menuitem" type="button" class="submenu-item"
                  autofocus&gt;New&lt;/button&gt;&lt;/li&gt;
-            &lt;li role="none"&gt;&lt;button type="button" class="submenu-item"&gt;Open&lt;/button&gt;&lt;/li&gt;
-            &lt;li role="none"&gt;&lt;button type="button" class="submenu-item"&gt;Save&lt;/button&gt;&lt;/li&gt;
+            &lt;li role="none"&gt;&lt;button role="menuitem" type="button" class="submenu-item"&gt;Open&lt;/button&gt;&lt;/li&gt;
+            &lt;li role="none"&gt;&lt;button role="menuitem" type="button" class="submenu-item"&gt;Save&lt;/button&gt;&lt;/li&gt;
         &lt;/ul&gt;
     &lt;/li&gt;
     &lt;!-- More menu items... --&gt;
 &lt;/ul&gt;</code></pre>
+      </details>
+    </section>
+
+    <section class="demo-section">
+      <h2 id="polyfill-consideration-popover-submenus">Polyfill Consideration: Popover Submenus</h2>
+      <p>
+        The submenu HTML in the demo above starts each
+        <code>&lt;ul role="menu"&gt;</code> with
+        <code>focusgroup="none"</code> rather than the
+        <code>focusgroup="menu"</code> you'd expect from the spec. A small
+        inline <code>toggle</code> listener on each popover then writes
+        <code>focusgroup="menu"</code> on open and resets to
+        <code>focusgroup="none"</code> on close.
+      </p>
+      <p>
+        Under <strong>native</strong> <code>focusgroup</code>, this
+        attribute toggle is a no-op. Arrow-key navigation within a
+        submenu only matters when the submenu is visible, and the
+        native implementation handles either pattern.
+      </p>
+      <p>
+        Under the
+        <a href="https://github.com/microsoft/polyfills/tree/main/packages/focusgroup">
+        <code>@microsoft/focusgroup-polyfill</code></a>, the toggle is
+        <strong>required</strong>. The polyfill scans for
+        <code>focusgroup</code>-bearing elements once when it loads and
+        then uses a <code>MutationObserver</code> to watch for added
+        elements and attribute changes — but
+        <a href="https://github.com/microsoft/polyfills/blob/0955f792/packages/focusgroup/README.md#limitations">
+        it does not observe popover visibility changes</a>. A submenu
+        that's already in the DOM as <code>focusgroup="menu"</code> but
+        hidden would have its items excluded by the polyfill's visibility
+        checks during the initial scan, and never re-evaluated when the
+        popover opens. The
+        <a href="https://github.com/microsoft/polyfills/blob/0955f792/packages/focusgroup/README.md#toggling-visibilities-of-focusgroup-items">
+        documented workaround</a> is to start hidden focusgroups as
+        <code>focusgroup="none"</code> and switch to a meaningful behavior
+        token only while they're visible, which is what this demo's
+        <code>toggle</code> handler does.
+      </p>
+      <p>
+        If you copy this demo's pattern into your own code and need to
+        support browsers without native <code>focusgroup</code>,
+        replicate the toggle handler — or your popover-revealed
+        submenus will be silently un-navigable in polyfilled mode.
+      </p>
+
+      <details class="source-code">
+        <summary>View the toggle handler</summary>
+        <pre><code>document.querySelectorAll("[popovertarget]").forEach(trigger =&gt; {
+    const popover = document.getElementById(trigger.getAttribute("popovertarget"));
+    if (!popover) return;
+    popover.addEventListener("toggle", e =&gt; {
+        const isOpen = e.newState === "open";
+        trigger.setAttribute("aria-expanded", String(isOpen));
+        if (isOpen) {
+            // Guard the rAF against rapid close-before-frame.
+            requestAnimationFrame(() =&gt; {
+                if (popover.matches?.(":popover-open")) {
+                    popover.setAttribute("focusgroup", "menu");
+                }
+            });
+        } else {
+            popover.setAttribute("focusgroup", "none");
+        }
+    });
+});</code></pre>
       </details>
     </section>
 
@@ -179,6 +260,7 @@
   </main>
 
   <script src="shared.js"></script>
+  <script type="module" src="load-focusgroup.mjs"></script>
   <script>
     document.addEventListener("DOMContentLoaded", function () {
       document.querySelectorAll("[popovertarget]").forEach(function (trigger) {
@@ -186,12 +268,42 @@
         var popover = document.getElementById(popoverId);
         if (!popover) return;
         popover.addEventListener("toggle", function (e) {
-          trigger.setAttribute("aria-expanded", e.newState === "open" ? "true" : "false");
+          var isOpen = e.newState === "open";
+          trigger.setAttribute("aria-expanded", isOpen ? "true" : "false");
+
+          // Toggle focusgroup="none" <-> focusgroup="menu" on the submenu
+          // so the polyfill's attribute observer can pick up the items only
+          // while the popover is visible. The polyfill does NOT observe
+          // popover visibility changes directly; the attribute change is
+          // the documented workaround. See:
+          //   https://github.com/microsoft/polyfills/blob/0955f792/packages/focusgroup/README.md#limitations
+          //   https://github.com/microsoft/polyfills/blob/0955f792/packages/focusgroup/README.md#toggling-visibilities-of-focusgroup-items
+          // This is also a no-op under the native implementation since
+          // arrow nav is only meaningful when the menu is visible anyway.
+          if (isOpen) {
+            // Defer the focusgroup="menu" write to the next frame so the
+            // polyfill's attribute observer sees it after the popover is
+            // visible. Guard against a rapid close/open or Escape-during-
+            // toggle: if the popover already isn't open by the time the
+            // frame runs, leave it as "none".
+            requestAnimationFrame(function () {
+              if (popover.matches && popover.matches(":popover-open")) {
+                popover.setAttribute("focusgroup", "menu");
+              }
+            });
+          } else {
+            popover.setAttribute("focusgroup", "none");
+          }
         });
       });
 
       document.addEventListener("keydown", function (e) {
         if (e.key !== "Escape") return;
+        // Guard against browsers without popover support (e.g. older
+        // engines that loaded the page+polyfill but never got the
+        // popover API). querySelector("[popover]:popover-open") throws
+        // a SyntaxError in those environments.
+        if (!("hidePopover" in HTMLElement.prototype)) return;
         var openPopover = document.querySelector("[popover]:popover-open");
         if (!openPopover) return;
         e.preventDefault();

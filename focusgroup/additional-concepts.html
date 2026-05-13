@@ -216,6 +216,7 @@
           <button type="button">B (DOM second)</button>
           <button type="button">C (DOM third)</button>
         </div>
+        <div id="reading-flow-impl-note" class="try-it" hidden></div>
       </div>
 
       <ul class="notice-list">
@@ -249,10 +250,12 @@
         If unsupported, you can fall back to a JavaScript-based roving
         tabindex or show a notice.
       </p>
-
-      <div class="demo-container">
-        <div id="feature-detect-result"></div>
-      </div>
+      <p>
+        The status pill at the top of this page already shows the live
+        result for this browser — native, polyfilled, or unsupported.
+        The snippet below is the actual check you'd use in your own
+        code.
+      </p>
 
       <details class="source-code">
         <summary>View source</summary>
@@ -262,6 +265,7 @@ if ('focusgroup' in HTMLElement.prototype) {
     console.log('focusgroup is supported');
 } else {
     // Not supported - fall back to JS roving tabindex
+    // (or load @microsoft/focusgroup-polyfill)
     console.log('focusgroup is NOT supported');
 }
 &lt;/script&gt;</code></pre>
@@ -271,20 +275,43 @@ if ('focusgroup' in HTMLElement.prototype) {
   </main>
 
   <script src="shared.js"></script>
+  <script type="module" src="load-focusgroup.mjs"></script>
   <script>
-    // Live feature detection result
+    // Update the Demo 4 (reading-flow) inline note based on whether
+    // the page is running under native focusgroup (where reading-flow
+    // integration is active) or the polyfill (which doesn't support
+    // reading-flow). The status pill in the page header covers the
+    // pageful state; this note is specifically for THIS demo.
     (function () {
-      var result = document.getElementById("feature-detect-result");
-      if (!result) return;
-      if ("focusgroup" in HTMLElement.prototype) {
-        result.textContent = "✅ focusgroup IS supported in this browser.";
-        result.style.background = "var(--accent-light)";
-        result.style.color = "var(--success)";
-      } else {
-        result.textContent = "❌ focusgroup is NOT supported in this browser. Enable experimental flags to try these demos.";
-        result.style.background = "var(--warning-bg)";
-        result.style.color = "var(--warning-text)";
+      var note = document.getElementById("reading-flow-impl-note");
+      if (!note) return;
+
+      function render(state) {
+        if (state === "native") {
+          note.hidden = false;
+          note.innerHTML =
+            "<strong>✨ Native <code>focusgroup</code> + <code>reading-flow</code> are active.</strong> " +
+            "Arrow navigation should follow visual order (C → B → A), not DOM order.";
+        } else if (state === "polyfill") {
+          note.hidden = false;
+          note.innerHTML =
+            "<strong>ℹ️ This demo requires native <code>focusgroup</code> support.</strong> " +
+            "The polyfill " +
+            "<a href=\"https://github.com/microsoft/polyfills/blob/0955f792/packages/focusgroup/README.md#limitations\">" +
+            "doesn't implement CSS <code>reading-flow</code> integration</a>, so arrow keys here " +
+            "will follow DOM order (A → B → C) instead of visual order. To try the visual-order behavior, " +
+            "enable native focusgroup via the experimental flag (see the status pill at the top of this page).";
+        } else {
+          note.hidden = true;
+        }
       }
+
+      var current = document.documentElement.dataset.focusgroupImpl;
+      if (current) render(current);
+      document.addEventListener("focusgroup-ready", function (e) {
+        var s = (e && e.detail && e.detail.state) || document.documentElement.dataset.focusgroupImpl;
+        if (s) render(s);
+      });
     })();
   </script>
 </body>
